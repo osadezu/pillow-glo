@@ -2,7 +2,7 @@
 #include <FastLED.h>
 
 // #define NUM_LEDS 240
-#define NUM_LEDS 16
+#define NUM_LEDS 32
 #define DATA_PIN 18
 
 CRGB leds[NUM_LEDS];
@@ -15,6 +15,8 @@ void setup()
 {
   FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
   FastLED.setBrightness(255);
+  FastLED.clear();
+  FastLED.show();
   Serial.begin(115200);
 }
 
@@ -26,30 +28,26 @@ void fadeall()
   }
 }
 
-void loop()
+void ebbAndFlow(CRGB leds[], int numLeds)
 {
-
-  t = millis() / 5;
+  t = millis() / 7;
   // scale = beatsin8(1, 0, 60);
   scale = 15;
 
-  for (int i = 0; i < NUM_LEDS; i++)
+  for (int i = 0; i < numLeds; i++)
   {
     uint8_t noise = inoise8(i * scale, t);
-    leds[i] = CRGB(noise, 0, 0);
+    // leds[i] = CRGB(noise, noise, noise);
+    leds[i].g = noise;
   }
 
-  // Serial.print(0);
-  // Serial.print(" ");
-  // Serial.print(scale * 4);
-  // Serial.print(" ");
-  // Serial.print(map(t, 0, 65535, 0, 240));
-  // Serial.print(" ");
-  // Serial.print(leds[0].r);
-  // Serial.print(" ");
-  // Serial.print(leds[1].r);
-  // Serial.print(" ");
-  // Serial.println(240);
-
   FastLED.show();
+}
+
+void loop()
+{
+  EVERY_N_MILLIS(6)
+  {
+    ebbAndFlow(leds, NUM_LEDS);
+  }
 }
