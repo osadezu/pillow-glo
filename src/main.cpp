@@ -3,14 +3,10 @@
 
 #define DATA_PIN 18
 
-#define NUM_LEDS 16
+#define NUM_LEDS 32
 #define NUM_MODULES 2
 // CRGB leds[NUM_MODULES][NUM_LEDS];
 CRGB leds[NUM_LEDS];
-
-uint16_t x;
-int scale;
-uint16_t t;
 
 void setup()
 {
@@ -33,24 +29,28 @@ void fade(CRGB leds[], int numLeds)
 
 void ebbAndFlow(CRGB leds[], int numLeds)
 {
-  t = millis() / 7;
-  // scale = beatsin8(1, 0, 60);
-  scale = 15;
+  uint16_t t = millis() / 7;
+  uint8_t scale = 15;
 
   for (int i = 0; i < numLeds; i++)
   {
     uint8_t noise = inoise8(i * scale, t);
-    noise = map(noise, 50, 190, 0, 255);
     // leds[i] = CRGB(noise, noise, noise);
     leds[i].g = noise;
   }
 
-  for (int in = 0; in < 256; in++)
+  FastLED.show();
+}
+
+void lava(CRGB leds[], int numLeds)
+{
+  uint16_t t = millis() / 5;
+  uint8_t scale = 150;
+
+  for (int i = 0; i < numLeds; i++)
   {
-    Serial.print(in);
-    Serial.print(", ");
-    uint8_t out = map(in, 50, 190, 0, 255);
-    Serial.println(out);
+    uint8_t val = inoise8(i * scale, t);
+    leds[i] = CHSV(CRGB::Red, 255, val);
   }
 
   FastLED.show();
@@ -60,6 +60,7 @@ void loop()
 {
   EVERY_N_MILLIS(6)
   {
-    ebbAndFlow(leds, NUM_LEDS);
+    // ebbAndFlow(leds, NUM_LEDS);
+    lava(leds, NUM_LEDS);
   }
 }
