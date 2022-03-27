@@ -1,10 +1,11 @@
 #include <Arduino.h>
 #include <FastLED.h>
 
-// #define NUM_LEDS 240
-#define NUM_LEDS 32
 #define DATA_PIN 18
 
+#define NUM_LEDS 16
+#define NUM_MODULES 2
+// CRGB leds[NUM_MODULES][NUM_LEDS];
 CRGB leds[NUM_LEDS];
 
 uint16_t x;
@@ -13,6 +14,8 @@ uint16_t t;
 
 void setup()
 {
+  // FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds[0], NUM_LEDS);
+  // FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds[1], NUM_LEDS);
   FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
   FastLED.setBrightness(255);
   FastLED.clear();
@@ -20,7 +23,7 @@ void setup()
   Serial.begin(115200);
 }
 
-void fadeall()
+void fade(CRGB leds[], int numLeds)
 {
   for (int i = 0; i < NUM_LEDS; i++)
   {
@@ -37,8 +40,22 @@ void ebbAndFlow(CRGB leds[], int numLeds)
   for (int i = 0; i < numLeds; i++)
   {
     uint8_t noise = inoise8(i * scale, t);
+    noise = map(noise, 50, 190, 0, 255);
     // leds[i] = CRGB(noise, noise, noise);
     leds[i].g = noise;
+  }
+
+  // long map(long x, long in_min, long in_max, long out_min, long out_max)
+  // {
+  //   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+  // }
+
+  for (int in = 0; in < 256; in++)
+  {
+    Serial.print(in);
+    Serial.print(", ");
+    uint8_t out = map(in, 50, 190, 0, 255);
+    Serial.println(out);
   }
 
   FastLED.show();
