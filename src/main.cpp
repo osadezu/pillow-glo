@@ -63,9 +63,18 @@ void lava(CRGB leds[], uint8_t offsets[], uint8_t numLeds)
 
 void loop()
 {
-  EVERY_N_MILLIS(6)
+  EVERY_N_SECONDS(3)
   {
-    // ebbAndFlow(leds, NUM_LEDS);
-    lava(leds, NUM_LEDS);
+    leds[3].r = 255;
+    leds[4].r = 255;
+  }
+
+  EVERY_N_MILLIS(17)
+  {
+    ebbAndFlow(leds, offsetsA, 7);
+    lava(leds, offsetsB, 7);
+    leds[3].nscale8(240);
+    leds[4].nscale8(240);
+    FastLED.show();
   }
 }
