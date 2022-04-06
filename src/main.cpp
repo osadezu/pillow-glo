@@ -3,15 +3,20 @@
 
 #define DATA_PIN 18
 
-#define NUM_LEDS 32
-#define NUM_MODULES 2
-// CRGB leds[NUM_MODULES][NUM_LEDS];
+// #define LEDS_MODULE 16
+// #define NUM_MODULES 15
+// #define NUM_LEDS (LEDS_MODULE * NUM_MODULES)
+#define NUM_LEDS 240
+
+// All pixels data
 CRGB leds[NUM_LEDS];
+
+uint8_t offsetsA[] = {0, 1, 2, 8, 9, 10, 11};
+uint8_t offsetsB[] = {5, 6, 7, 12, 13, 14, 15};
+uint8_t offsetsC[] = {3, 4};
 
 void setup()
 {
-  // FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds[0], NUM_LEDS);
-  // FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds[1], NUM_LEDS);
   FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
   FastLED.setBrightness(255);
   FastLED.clear();
@@ -27,7 +32,7 @@ void fade(CRGB leds[], int numLeds)
   }
 }
 
-void ebbAndFlow(CRGB leds[], int numLeds)
+void ebbAndFlow(CRGB leds[], uint8_t offsets[], uint8_t numLeds)
 {
   uint16_t t = millis() / 7;
   uint8_t scale = 15;
@@ -36,13 +41,13 @@ void ebbAndFlow(CRGB leds[], int numLeds)
   {
     uint8_t noise = inoise8(i * scale, t);
     // leds[i] = CRGB(noise, noise, noise);
-    leds[i].g = noise;
+    leds[offsets[i]].g = noise;
   }
 
-  FastLED.show();
+  // FastLED.show();
 }
 
-void lava(CRGB leds[], int numLeds)
+void lava(CRGB leds[], uint8_t offsets[], uint8_t numLeds)
 {
   uint16_t t = millis() / 5;
   uint8_t scale = 150;
@@ -50,10 +55,10 @@ void lava(CRGB leds[], int numLeds)
   for (int i = 0; i < numLeds; i++)
   {
     uint8_t val = inoise8(i * scale, t);
-    leds[i] = CHSV(CRGB::Red, 255, val);
+    leds[offsets[i]] = CHSV(CRGB::Red, 255, val);
   }
 
-  FastLED.show();
+  // FastLED.show();
 }
 
 void loop()
