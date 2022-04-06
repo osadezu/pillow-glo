@@ -3,10 +3,9 @@
 
 #define DATA_PIN 18
 
-// #define LEDS_MODULE 16
-// #define NUM_MODULES 15
-// #define NUM_LEDS (LEDS_MODULE * NUM_MODULES)
-#define NUM_LEDS 240
+#define LEDS_MODULE 16
+#define NUM_MODULES 15
+#define NUM_LEDS (LEDS_MODULE * NUM_MODULES)
 
 // All pixels data
 CRGB leds[NUM_LEDS];
