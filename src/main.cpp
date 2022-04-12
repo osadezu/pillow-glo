@@ -10,9 +10,11 @@
 // All pixels data
 CRGB leds[NUM_LEDS];
 
-uint8_t offsetsA[] = {0, 1, 2, 8, 9, 10, 11};
-uint8_t offsetsB[] = {5, 6, 7, 12, 13, 14, 15};
-uint8_t offsetsC[] = {3, 4};
+uint8_t offsetsA[] = {0, 1, 8, 9, 10, 11};
+uint8_t offsetsB[] = {6, 7, 12, 13, 14, 15};
+uint8_t offsetsC[] = {2, 3, 4, 5};
+
+uint8_t gate = 0;
 
 void setup()
 {
@@ -23,11 +25,19 @@ void setup()
   Serial.begin(115200);
 }
 
-void fade(CRGB leds[], int numLeds)
+void fade(CRGB leds[], uint8_t offsets[], uint8_t numLeds)
 {
-  for (int i = 0; i < NUM_LEDS; i++)
+  for (int i = 0; i < numLeds; i++)
   {
-    leds[i].nscale8(220);
+    leds[offsets[i]].nscale8(240);
+  }
+}
+
+void clear(CRGB leds[], uint8_t offsets[], uint8_t numLeds)
+{
+  for (int i = 0; i < numLeds; i++)
+  {
+    leds[offsets[i]] = CRGB(0, 0, 0);
   }
 }
 
@@ -39,11 +49,21 @@ void ebbAndFlow(CRGB leds[], uint8_t offsets[], uint8_t numLeds)
   for (int i = 0; i < numLeds; i++)
   {
     uint8_t noise = inoise8(i * scale, t);
-    // leds[i] = CRGB(noise, noise, noise);
-    leds[offsets[i]].g = noise;
+    leds[offsets[i]] = CRGB(noise, noise, noise);
+    // leds[offsets[i]].g = noise;
   }
+}
 
-  // FastLED.show();
+void ebbAndFlowAll(uint8_t numLeds)
+{
+  uint16_t t = millis() / 7;
+  uint8_t scale = 15;
+
+  for (int i = 0; i < numLeds; i++)
+  {
+    uint8_t noise = inoise8(i * scale, t);
+    leds[i] = CRGB(noise, noise, noise);
+  }
 }
 
 void lava(CRGB leds[], uint8_t offsets[], uint8_t numLeds)
@@ -62,18 +82,33 @@ void lava(CRGB leds[], uint8_t offsets[], uint8_t numLeds)
 
 void loop()
 {
-  EVERY_N_SECONDS(3)
+  // EVERY_N_SECONDS(3)
+  // {
+  //   leds[3].r = 255;
+  //   leds[4].r = 255;
+  // }
+
+  EVERY_N_SECONDS(5)
   {
-    leds[3].r = 255;
-    leds[4].r = 255;
+    gate ^= 1;
   }
 
   EVERY_N_MILLIS(17)
   {
-    ebbAndFlow(leds, offsetsA, 7);
-    lava(leds, offsetsB, 7);
-    leds[3].nscale8(240);
-    leds[4].nscale8(240);
+    // ebbAndFlowAll(16 * 14);
+    if (gate)
+    {
+      ebbAndFlow(leds, offsetsA, 6);
+      fade(leds, offsetsB, 6);
+    }
+    else
+    {
+      ebbAndFlow(leds, offsetsB, 6);
+      fade(leds, offsetsA, 6);
+    }
+    // lava(leds, offsetsB, 7);
+    // leds[3].nscale8(240);
+    // leds[4].nscale8(240);
     FastLED.show();
   }
 }
