@@ -54,15 +54,15 @@ void ebbAndFlow(CRGB leds[], uint8_t offsets[], uint8_t numLeds)
   }
 }
 
-void ebbAndFlowAll(uint8_t numLeds)
+void ebbAndFlowAll()
 {
   uint16_t t = millis() / 7;
   uint8_t scale = 15;
 
-  for (int i = 0; i < numLeds; i++)
+  for (int i = 0; i < NUM_LEDS; i++)
   {
     uint8_t noise = inoise8(i * scale, t);
-    leds[i] = CRGB(noise, noise, noise);
+    leds[i] = CRGB(0, noise, 0);
   }
 }
 
@@ -82,30 +82,26 @@ void lava(CRGB leds[], uint8_t offsets[], uint8_t numLeds)
 
 void loop()
 {
-  // EVERY_N_SECONDS(3)
-  // {
-  //   leds[3].r = 255;
-  //   leds[4].r = 255;
-  // }
 
-  EVERY_N_SECONDS(5)
-  {
-    gate ^= 1;
-  }
+  // EVERY_N_SECONDS(5)
+  // {
+  //   gate ^= 1;
+  // }
 
   EVERY_N_MILLIS(17)
   {
-    // ebbAndFlowAll(16 * 14);
-    if (gate)
-    {
-      ebbAndFlow(leds, offsetsA, 6);
-      fade(leds, offsetsB, 6);
-    }
-    else
-    {
-      ebbAndFlow(leds, offsetsB, 6);
-      fade(leds, offsetsA, 6);
-    }
+    ebbAndFlowAll();
+
+    // if (gate)
+    // {
+    //   ebbAndFlow(leds, offsetsA, 6);
+    //   fade(leds, offsetsB, 6);
+    // }
+    // else
+    // {
+    //   ebbAndFlow(leds, offsetsB, 6);
+    //   fade(leds, offsetsA, 6);
+    // }
     // lava(leds, offsetsB, 7);
     // leds[3].nscale8(240);
     // leds[4].nscale8(240);
