@@ -1,7 +1,8 @@
 #include <Arduino.h>
 #include <FastLED.h>
 
-#define DATA_PIN 18
+#define DATA_PIN 18 // GPIO18 @ DevKit right-9
+#define POT_PIN 36 // ADC1_0 - GPIO36 @ DevKit left-3
 
 #define LEDS_MODULE 16
 #define NUM_MODULES 15
@@ -19,10 +20,22 @@ uint8_t gate = 0;
 void setup()
 {
   FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
-  FastLED.setBrightness(255);
+  FastLED.setBrightness(128);
   FastLED.clear();
   FastLED.show();
   Serial.begin(115200);
+}
+
+void readBrightness() {
+  int analogValue = analogRead(POT_PIN);
+  int brightness = map(analogValue, 0, 4095, 0, 255);
+
+  Serial.print("Analog = ");
+  Serial.print(analogValue);
+  Serial.print(" => brightness = ");
+  Serial.println(brightness);
+
+  FastLED.setBrightness(brightness);
 }
 
 void fade(CRGB leds[], uint8_t offsets[], uint8_t numLeds)
@@ -82,6 +95,11 @@ void lava(CRGB leds[], uint8_t offsets[], uint8_t numLeds)
 
 void loop()
 {
+
+  EVERY_N_MILLIS(100)
+  {
+    readBrightness();
+  }
 
   // EVERY_N_SECONDS(5)
   // {
