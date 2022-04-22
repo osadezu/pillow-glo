@@ -3,19 +3,15 @@
 
 #include "Pixels.h"
 
-// Settings inputs
 #define POT_PIN 36 // ADC1_0 - GPIO36 @ DevKit left-3
-
-// Settings outputs
 #define LED_PIN 25 // GPIO25 @ DevKit left-9
-
 #define SETTINGS_MODES 1
-// Mode 1: pixel selection (R-G-B)
+// Mode 1: pixel channels (R-G-B)
 
 namespace Settings
 {
 
-  static uint8_t settingsMode = 0;
+  uint8_t settingsMode = 0;
 
   ezButton modeButton(32); // GPIO32 @ DevKit left-7
   ezButton adjButton(33);  // GPIO33 @ DevKit left-8
@@ -24,12 +20,6 @@ namespace Settings
   {
     int analogValue = analogRead(POT_PIN);
     int brightness = map(analogValue, 0, 4095, 0, 255);
-
-    // Serial.print("Analog = ");
-    // Serial.print(analogValue);
-    // Serial.print(" => brightness = ");
-    // Serial.println(brightness);
-
     Pixels::setGlobalBrightness(brightness);
   }
 
@@ -53,6 +43,21 @@ namespace Settings
     if (settingsMode)
     {
       digitalWrite(LED_PIN, HIGH);
+      adjButton.loop(); // Update button state
+
+      if (adjButton.isPressed())
+      {
+        switch (settingsMode)
+        {
+        case 1:
+          Pixels::setChannels();
+          break;
+
+        default:
+          break;
+        }
+      }
+
       readBrightness();
     }
     else
