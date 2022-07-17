@@ -7,8 +7,6 @@
 #define LED_PIN 25      // GPIO25 @ DevKit left-9
 #define BTN_MODE_PIN 32 // GPIO32 @ DevKit left-7
 #define BTN_ADJ_PIN 33  // GPIO33 @ DevKit left-8
-#define SETTINGS_MODES 1
-// Mode 1: pixel channels (R-G-B)
 
 namespace Settings
 {
@@ -40,26 +38,26 @@ namespace Settings
   void loop()
   {
     modeButton.loop(); // Update button state
-    settingsMode = modeButton.getCount() % (SETTINGS_MODES + 1);
+    if (modeButton.isPressed())
+    {
+      settingsMode++;
+    }
 
     if (settingsMode)
     {
       digitalWrite(LED_PIN, HIGH);
-
       adjButton.loop(); // Update button state
-      if (adjButton.isPressed())
+      switch (settingsMode)
       {
-        switch (settingsMode)
+      case 1: // Mode 1: pixel channels (R-G-B)
+        if (adjButton.isPressed())
         {
-        case 1:
           Pixels::setChannels();
-          break;
-
-        default:
-          break;
         }
+        break;
+      default:
+        settingsMode = 0;
       }
-
       readBrightness();
     }
     else
