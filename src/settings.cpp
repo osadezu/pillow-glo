@@ -3,8 +3,10 @@
 
 #include "Pixels.h"
 
-#define POT_PIN 36 // ADC1_0 - GPIO36 @ DevKit left-3
-#define LED_PIN 25 // GPIO25 @ DevKit left-9
+#define POT_PIN 36      // ADC1_0 - GPIO36 @ DevKit left-3
+#define LED_PIN 25      // GPIO25 @ DevKit left-9
+#define BTN_MODE_PIN 32 // GPIO32 @ DevKit left-7
+#define BTN_ADJ_PIN 33  // GPIO33 @ DevKit left-8
 #define SETTINGS_MODES 1
 // Mode 1: pixel channels (R-G-B)
 
@@ -13,8 +15,8 @@ namespace Settings
 
   uint8_t settingsMode = 0;
 
-  ezButton modeButton(32); // GPIO32 @ DevKit left-7
-  ezButton adjButton(33);  // GPIO33 @ DevKit left-8
+  ezButton modeButton(BTN_MODE_PIN);
+  ezButton adjButton(BTN_ADJ_PIN);
 
   void readBrightness()
   {
@@ -43,8 +45,8 @@ namespace Settings
     if (settingsMode)
     {
       digitalWrite(LED_PIN, HIGH);
-      adjButton.loop(); // Update button state
 
+      adjButton.loop(); // Update button state
       if (adjButton.isPressed())
       {
         switch (settingsMode)
