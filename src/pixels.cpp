@@ -11,11 +11,17 @@ namespace Pixels
 {
   CRGB leds[NUM_LEDS];
 
+  struct uvLoop
+  {
+    uint8_t excitation = 1;
+    CRGB *leds;
+  };
+
   uint8_t offsetsA[] = {0, 1, 8, 9, 10, 11};
   uint8_t offsetsB[] = {6, 7, 12, 13, 14, 15};
   uint8_t offsetsC[] = {2, 3, 4, 5};
 
-  uint8_t additionalChannels = 0;
+  uint8_t channelMask = 2;
 
   void setup()
   {
@@ -27,8 +33,20 @@ namespace Pixels
 
   void setChannels()
   {
-    additionalChannels = (additionalChannels + 1) % 3;
-    Serial.println(additionalChannels);
+    channelMask = (channelMask + 1) % 8;
+    Serial.println(channelMask);
+  }
+
+  uint32_t allChannels(uint8_t colorcode)
+  {
+    uint32_t channels = 0;
+    if (channelMask & 0b001)
+      channels |= (colorcode << 0);
+    if (channelMask & 0b010)
+      channels |= (colorcode << 8);
+    if (channelMask & 0b100)
+      channels |= (colorcode << 16);
+    return channels;
   }
 
   void setGlobalBrightness(uint8_t brightness)
@@ -60,8 +78,8 @@ namespace Pixels
     for (int i = 0; i < numLeds; i++)
     {
       uint8_t noise = inoise8(i * scale, t);
-      leds[offsets[i]] = CRGB(noise, noise, noise);
-      // leds[offsets[i]].g = noise;
+      uint32_t noiseRGB = allChannels(noise);
+      leds[offsets[i]] = CRGB(noiseRGB);
     }
   }
 
@@ -73,22 +91,9 @@ namespace Pixels
     for (int i = 0; i < NUM_LEDS; i++)
     {
       uint8_t noise = inoise8(i * scale, t);
-
-      switch (additionalChannels)
-      {
-      case 0:
-        leds[i] = CRGB(0, noise, 0);
-        break;
-
-      case 1:
-        leds[i] = CRGB(noise, 0, noise);
-        break;
-
-      case 2:
-        leds[i] = CRGB(noise, noise, noise);
-        break;
-      }
-        }
+      uint32_t noiseRGB = allChannels(noise);
+      leds[i] = CRGB(noiseRGB);
+    }
   }
 
   void lava(CRGB leds[], uint8_t offsets[], uint8_t numLeds)
