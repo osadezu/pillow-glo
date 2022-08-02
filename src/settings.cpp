@@ -21,12 +21,12 @@ namespace Settings
     int analogValue = analogRead(POT_PIN);
     int brightness = map(analogValue, 0, 4095, 0, 255);
     Pixels::setGlobalBrightness(brightness);
+    Serial.println(brightness);
   }
 
   void setup()
   {
     modeButton.setDebounceTime(100);
-    modeButton.setCountMode(COUNT_FALLING);
     adjButton.setDebounceTime(100);
 
     pinMode(LED_PIN, OUTPUT);
@@ -37,6 +37,7 @@ namespace Settings
 
   void loop()
   {
+    readBrightness();
     modeButton.loop(); // Update button state
     if (modeButton.isPressed())
     {
@@ -58,7 +59,6 @@ namespace Settings
       default:
         settingsMode = 0;
       }
-      readBrightness();
     }
     else
     {
