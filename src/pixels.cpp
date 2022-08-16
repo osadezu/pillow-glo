@@ -100,7 +100,20 @@ namespace Pixels
     }
   }
 
-  void ebbAndFlow(CRGB leds[], uint8_t offsets[], uint8_t numLeds)
+  void ebbAndFlowLoops(uvLoop loop)
+  {
+    uint16_t t = millis() / 7;
+    uint8_t scale = 15;
+
+    for (int i = 0; i < loop.ledCount; i++)
+    {
+      uint8_t noise = inoise8(i * scale, t);
+      uint32_t noiseRGB = allChannels(noise);
+      loop.leds[i] = CRGB(noiseRGB);
+    }
+  }
+
+  void ebbAndFlowLeds(CRGB leds[], uint8_t offsets[], uint8_t numLeds)
   {
     uint16_t t = millis() / 7;
     uint8_t scale = 15;
@@ -144,23 +157,31 @@ namespace Pixels
     {
       // ebbAndFlowAll();
 
-      CRGB colors[3] = {CRGB::Red,
-                        CRGB::Green,
-                        CRGB::Blue};
+      // CRGB colors[3] = {CRGB::Red,
+      //                   CRGB::Green,
+      //                   CRGB::Blue};
 
+      // for (int i = 0; i < NUM_MODULES; i++)
+      // {
+      //   setLoop(allLoops[i], colors[i % 3]);
+      // }
+
+      // ebbAndFlowLoops(allLoops[1]);
+      // ebbAndFlowLoops(allLoops[3]);
       for (int i = 0; i < NUM_MODULES; i++)
       {
-        setLoop(allLoops[i], colors[i % 3]);
+        if (i % 3 != 0)
+          ebbAndFlowLoops(allLoops[i]);
       }
 
       // if (gate)
       // {
-      //   ebbAndFlow(leds, offsetsA, 6);
+      //   Ledsleds, offsetsA, 6);
       //   fade(leds, offsetsB, 6);
       // }
       // else
       // {
-      //   ebbAndFlow(leds, offsetsB, 6);
+      //   Ledsleds, offsetsB, 6);
       //   fade(leds, offsetsA, 6);
       // }
       // lava(leds, offsetsB, 7);
