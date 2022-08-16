@@ -21,7 +21,6 @@ namespace Settings
     int analogValue = analogRead(POT_PIN);
     int brightness = map(analogValue, 0, 4095, 0, 255);
     Pixels::setGlobalBrightness(brightness);
-    Serial.println(brightness);
   }
 
   void setup()
