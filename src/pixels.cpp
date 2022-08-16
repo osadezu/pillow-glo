@@ -3,18 +3,33 @@
 
 // WS2811 output
 #define DATA_PIN 18 // GPIO18 @ DevKit right-9
-#define LEDS_MODULE 16
+
+/* Comment this line for final pixel setup */
+#define TESTGRID
+
+#ifndef TESTGRID
+// Trailer setup values
 #define NUM_MODULES 15
-#define NUM_LEDS (LEDS_MODULE * NUM_MODULES)
+#define LEDS_MODULE 16
+#else
+// Test grid setup values
+#define NUM_MODULES 16
+#define LEDS_MODULE 4
+#endif
+
+#define TOTAL_LEDS (LEDS_MODULE * NUM_MODULES)
 
 namespace Pixels
 {
-  CRGB leds[NUM_LEDS];
+  CRGB leds[TOTAL_LEDS];
 
   struct uvLoop
   {
     uint8_t excitation = 1;
+    uint8_t ledCount = LEDS_MODULE;
     CRGB *leds;
+    uvLoop *up;
+    uvLoop *down;
   };
 
   uint8_t offsetsA[] = {0, 1, 8, 9, 10, 11};
@@ -23,17 +38,32 @@ namespace Pixels
 
   uint8_t channelMask = 2;
 
+  uvLoop allLoops[NUM_MODULES];
+
+  void setLoop(uvLoop loop, CRGB value)
+  {
+    for (int i = 0; i < loop.ledCount; i++)
+    {
+      loop.leds[i] = value;
+    }
+  }
+
   void setup()
   {
-    FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
+    FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, TOTAL_LEDS);
     FastLED.setBrightness(128);
     FastLED.clear();
     FastLED.show();
+
+    for (int i = 0; i < NUM_MODULES; i++)
+    {
+      allLoops[i].leds = &leds[i * LEDS_MODULE];
+    }
   }
 
   void setChannels()
   {
-    channelMask = (channelMask + 1) % 8;
+    channelMask = (channelMask) % 7 + 1; // All channel combinations RGB
     Serial.println(channelMask);
   }
 
@@ -88,7 +118,7 @@ namespace Pixels
     uint16_t t = millis() / 7;
     uint8_t scale = 15;
 
-    for (int i = 0; i < NUM_LEDS; i++)
+    for (int i = 0; i < TOTAL_LEDS; i++)
     {
       uint8_t noise = inoise8(i * scale, t);
       uint32_t noiseRGB = allChannels(noise);
@@ -112,7 +142,16 @@ namespace Pixels
   {
     EVERY_N_MILLIS(17)
     {
-      ebbAndFlowAll();
+      // ebbAndFlowAll();
+
+      CRGB colors[3] = {CRGB::Red,
+                        CRGB::Green,
+                        CRGB::Blue};
+
+      for (int i = 0; i < NUM_MODULES; i++)
+      {
+        setLoop(allLoops[i], colors[i % 3]);
+      }
 
       // if (gate)
       // {
