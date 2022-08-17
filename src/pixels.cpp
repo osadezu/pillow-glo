@@ -27,12 +27,12 @@ namespace Pixels
   {
     uint8_t ledCount = LEDS_MODULE;
     CRGB *leds;
-    uint8_t excitation = 0;
+    uint8_t excitation = 128;
     uint8_t deferred = 0;
-    uvLoop *up;
-    uvLoop *right;
-    uvLoop *down;
-    uvLoop *left;
+    uvLoop *up = NULL;
+    uvLoop *right = NULL;
+    uvLoop *down = NULL;
+    uvLoop *left = NULL;
   };
 
   uint8_t offsetsA[] = {0, 1, 8, 9, 10, 11};
