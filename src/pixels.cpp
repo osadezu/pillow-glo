@@ -25,11 +25,14 @@ namespace Pixels
 
   struct uvLoop
   {
-    uint8_t excitation = 1;
     uint8_t ledCount = LEDS_MODULE;
     CRGB *leds;
+    uint8_t excitation = 0;
+    uint8_t deferred = 0;
     uvLoop *up;
+    uvLoop *right;
     uvLoop *down;
+    uvLoop *left;
   };
 
   uint8_t offsetsA[] = {0, 1, 8, 9, 10, 11};
@@ -92,6 +95,15 @@ namespace Pixels
     }
   }
 
+  void fadeAll()
+  {
+    uint8_t decay = 254;
+    for (int i = 0; i < TOTAL_LEDS; i++)
+    {
+      leds[i].nscale8(decay);
+    }
+  }
+
   void clear(CRGB leds[], uint8_t offsets[], uint8_t numLeds)
   {
     for (int i = 0; i < numLeds; i++)
@@ -102,8 +114,8 @@ namespace Pixels
 
   void ebbAndFlowLoops(uvLoop loop)
   {
-    uint16_t t = millis() / 7;
-    uint8_t scale = 15;
+    uint16_t t = millis() / 2;
+    uint8_t scale = 50;
 
     for (int i = 0; i < loop.ledCount; i++)
     {
@@ -139,6 +151,18 @@ namespace Pixels
     }
   }
 
+  void lavaLoops(uvLoop loop)
+  {
+    uint16_t t = millis() / 5;
+    uint8_t scale = 150;
+
+    for (int i = 0; i < loop.ledCount; i++)
+    {
+      uint8_t val = inoise8(i * scale, t);
+      loop.leds[i] = CHSV(CRGB::Red, 255, val);
+    }
+  }
+
   void lava(CRGB leds[], uint8_t offsets[], uint8_t numLeds)
   {
     uint16_t t = millis() / 5;
@@ -153,8 +177,20 @@ namespace Pixels
 
   void loop()
   {
-    EVERY_N_MILLIS(17)
+    EVERY_N_SECONDS(3)
     {
+      uint8_t thisLoop = random8(NUM_MODULES - 1);
+      allLoops[thisLoop].excitation = random8();
+
+      Serial.print(thisLoop);
+      Serial.print(" -> ");
+      Serial.println(allLoops[thisLoop].excitation);
+    }
+
+    EVERY_N_MILLIS(20)
+    {
+      fadeAll();
+
       // ebbAndFlowAll();
 
       // CRGB colors[3] = {CRGB::Red,
@@ -166,27 +202,15 @@ namespace Pixels
       //   setLoop(allLoops[i], colors[i % 3]);
       // }
 
-      // ebbAndFlowLoops(allLoops[1]);
-      // ebbAndFlowLoops(allLoops[3]);
       for (int i = 0; i < NUM_MODULES; i++)
       {
-        if (i % 3 != 0)
+        if (allLoops[i].excitation > 127)
+        {
           ebbAndFlowLoops(allLoops[i]);
+        }
+        // lavaLoops(allLoops[i]);
       }
 
-      // if (gate)
-      // {
-      //   Ledsleds, offsetsA, 6);
-      //   fade(leds, offsetsB, 6);
-      // }
-      // else
-      // {
-      //   Ledsleds, offsetsB, 6);
-      //   fade(leds, offsetsA, 6);
-      // }
-      // lava(leds, offsetsB, 7);
-      // leds[3].nscale8(240);
-      // leds[4].nscale8(240);
       FastLED.show();
     }
   }
