@@ -21,7 +21,7 @@ namespace Settings
     uint8_t analogValue = map(analogRead(POT_PIN), 0, 4095, 0, 255);
     // uint8_t brightness = dim8_raw(analogValue);
     Pixels::setGlobalBrightness(analogValue);
-    Serial.println(analogValue);
+    // Serial.println(analogValue);
   }
 
   void setup()
