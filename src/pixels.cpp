@@ -20,8 +20,8 @@
 #define TOTAL_LEDS (LEDS_MODULE * NUM_MODULES)
 
 // Observed values from noise8
-#define NOISE_LOWER_BOUND = 34;
-#define NOISE_UPPER_BOUND = 218;
+#define NOISE_LOWER_BOUND = 30;  // 34 much sooner
+#define NOISE_UPPER_BOUND = 228; // 218 much sooner
 
 namespace Pixels
 {
@@ -31,7 +31,7 @@ namespace Pixels
   {
     uint8_t ledCount = LEDS_MODULE;
     CRGB *leds;
-    uint8_t excitation = 128;
+    uint8_t excitation = 0;
     uint8_t deferred = 0;
     uvLoop *up = NULL;
     uvLoop *right = NULL;
@@ -61,7 +61,7 @@ namespace Pixels
 
   // Behavior Variables
   uint8_t decay = 254;               // proportion of 255 to fade inactive loops each frame
-  uint8_t activationThreshold = 127; // excitation level at which loops can turn on
+  uint8_t activationThreshold = 170; // excitation level at which loops can turn on
 
   void checkMinMaxNoise(uint8_t noiseSample)
   {
@@ -78,11 +78,17 @@ namespace Pixels
     Serial.println(maxNoise);
   }
 
-  void loopExcitation()
+  void exciteRandomLoop()
+  {
+    uint8_t thisLoop = random8(NUM_MODULES - 1);
+    allLoops[thisLoop].excitation = random8();
+  }
+
+  void exciteLoopGridWithNoise()
   {
     uint16_t t = millis();
     uint8_t yScale = 50;
-    uint8_t xScale = 50;
+    uint8_t xScale = 20;
 
     for (int y = 0; y < loopGridHeight; y++)
     {
@@ -227,11 +233,10 @@ namespace Pixels
 
   void loop()
   {
-    EVERY_N_SECONDS(1)
+    EVERY_N_SECONDS(5)
     {
-      // uint8_t thisLoop = random8(NUM_MODULES - 1);
-      // allLoops[thisLoop].excitation = random8();
-      loopExcitation();
+      // exciteLoopGridWithNoise();
+      exciteRandomLoop();
     }
 
     EVERY_N_MILLIS(20)
