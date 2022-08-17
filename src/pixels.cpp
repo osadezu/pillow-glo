@@ -31,12 +31,11 @@ namespace Pixels
   {
     uint8_t ledCount = LEDS_MODULE;
     CRGB *leds;
+    bool isActive = false;
     uint8_t excitation = 0;
     uint8_t deferred = 0;
-    uvLoop *up = NULL;
-    uvLoop *right = NULL;
-    uvLoop *down = NULL;
-    uvLoop *left = NULL;
+    uint8_t neighborCount = 0;
+    uvLoop *neighbors[3];
   };
 
   uint8_t offsetsA[] = {0, 1, 8, 9, 10, 11};
@@ -52,16 +51,20 @@ namespace Pixels
 // Trailer setup
 #else
   // Test grid setup
-  int loopGridHeight = 2;
-  int loopGridWidth = 8;
+  const int loopGridHeight = 2;
+  const int loopGridWidth = 8;
   uvLoop *loopGrid[2][8] = {
       {&allLoops[0], &allLoops[3], &allLoops[4], &allLoops[7], &allLoops[8], &allLoops[11], &allLoops[12], &allLoops[15]},
       {&allLoops[1], &allLoops[2], &allLoops[5], &allLoops[6], &allLoops[9], &allLoops[10], &allLoops[13], &allLoops[14]}};
 #endif
 
   // Behavior Variables
-  uint8_t decay = 254;               // proportion of 255 to fade inactive loops each frame
-  uint8_t activationThreshold = 170; // excitation level at which loops can turn on
+  const uint8_t decay = 254;               // proportion of 255 to fade inactive loops each frame
+  const uint8_t activationThreshold = 170; // excitation level at which loops can turn on
+  const uint8_t maxActiveLoops = 8;
+
+  // State Variables
+  uint8_t activeLoops = 0;
 
   void checkMinMaxNoise(uint8_t noiseSample)
   {
@@ -78,10 +81,39 @@ namespace Pixels
     Serial.println(maxNoise);
   }
 
+  // Check all loops excitation
+  void handleLoopActivation()
+  {
+    int countActiveLoops = 0;
+    for (int i = 0; i < NUM_MODULES; i++)
+    {
+      if (allLoops[i].excitation > activationThreshold)
+      {
+        allLoops[i].isActive = true;
+        countActiveLoops++;
+      }
+      else
+      {
+        allLoops[i].isActive = false;
+      }
+    }
+    activeLoops = countActiveLoops;
+    Serial.println("Active loops");
+    Serial.println(activeLoops);
+  }
+
+  // Assign random excitation level to randomly chosen loop
   void exciteRandomLoop()
   {
+    uint8_t excitation = random8();
+    Serial.println("Excitation");
+    Serial.println(excitation);
+    if (excitation > activationThreshold && activeLoops >= maxActiveLoops)
+      return;
     uint8_t thisLoop = random8(NUM_MODULES - 1);
-    allLoops[thisLoop].excitation = random8();
+    allLoops[thisLoop].excitation = excitation;
+    Serial.println("Excited loop");
+    Serial.println(thisLoop);
   }
 
   void exciteLoopGridWithNoise()
@@ -233,10 +265,11 @@ namespace Pixels
 
   void loop()
   {
-    EVERY_N_SECONDS(5)
+    EVERY_N_SECONDS(3)
     {
       // exciteLoopGridWithNoise();
       exciteRandomLoop();
+      handleLoopActivation();
     }
 
     EVERY_N_MILLIS(20)
@@ -256,7 +289,7 @@ namespace Pixels
 
       for (int i = 0; i < NUM_MODULES; i++)
       {
-        if (allLoops[i].excitation > activationThreshold)
+        if (allLoops[i].isActive)
         {
           ebbAndFlowLoops(allLoops[i]);
         }
