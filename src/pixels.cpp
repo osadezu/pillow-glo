@@ -19,6 +19,10 @@
 
 #define TOTAL_LEDS (LEDS_MODULE * NUM_MODULES)
 
+// Observed values from noise8
+#define NOISE_LOWER_BOUND = 34;
+#define NOISE_UPPER_BOUND = 218;
+
 namespace Pixels
 {
   CRGB leds[TOTAL_LEDS];
@@ -42,6 +46,54 @@ namespace Pixels
   uint8_t channelMask = 2;
 
   uvLoop allLoops[NUM_MODULES];
+
+// TODO: Move definitions to independent files
+#ifndef TESTGRID
+// Trailer setup
+#else
+  // Test grid setup
+  int loopGridHeight = 2;
+  int loopGridWidth = 8;
+  uvLoop *loopGrid[2][8] = {
+      {&allLoops[0], &allLoops[3], &allLoops[4], &allLoops[7], &allLoops[8], &allLoops[11], &allLoops[12], &allLoops[15]},
+      {&allLoops[1], &allLoops[2], &allLoops[5], &allLoops[6], &allLoops[9], &allLoops[10], &allLoops[13], &allLoops[14]}};
+#endif
+
+  // Behavior Variables
+  uint8_t decay = 254;               // proportion of 255 to fade inactive loops each frame
+  uint8_t activationThreshold = 127; // excitation level at which loops can turn on
+
+  void checkMinMaxNoise(uint8_t noiseSample)
+  {
+    static uint8_t minNoise = 255;
+    static uint8_t maxNoise = 0;
+
+    if (noiseSample < minNoise)
+      minNoise = noiseSample;
+    if (noiseSample > maxNoise)
+      maxNoise = noiseSample;
+
+    Serial.println("MinMaxNoise");
+    Serial.println(minNoise);
+    Serial.println(maxNoise);
+  }
+
+  void loopExcitation()
+  {
+    uint16_t t = millis();
+    uint8_t yScale = 50;
+    uint8_t xScale = 50;
+
+    for (int y = 0; y < loopGridHeight; y++)
+    {
+      for (int x = 0; x < loopGridWidth; x++)
+      {
+        uint8_t noise = inoise8(y * yScale, x * xScale, t);
+        checkMinMaxNoise(noise);
+        loopGrid[y][x]->excitation = noise;
+      }
+    }
+  }
 
   void setLoop(uvLoop loop, CRGB value)
   {
@@ -67,7 +119,6 @@ namespace Pixels
   void setChannels()
   {
     channelMask = (channelMask) % 7 + 1; // All channel combinations RGB
-    Serial.println(channelMask);
   }
 
   uint32_t allChannels(uint8_t colorcode)
@@ -97,7 +148,6 @@ namespace Pixels
 
   void fadeAll()
   {
-    uint8_t decay = 254;
     for (int i = 0; i < TOTAL_LEDS; i++)
     {
       leds[i].nscale8(decay);
@@ -177,14 +227,11 @@ namespace Pixels
 
   void loop()
   {
-    EVERY_N_SECONDS(3)
+    EVERY_N_SECONDS(1)
     {
-      uint8_t thisLoop = random8(NUM_MODULES - 1);
-      allLoops[thisLoop].excitation = random8();
-
-      Serial.print(thisLoop);
-      Serial.print(" -> ");
-      Serial.println(allLoops[thisLoop].excitation);
+      // uint8_t thisLoop = random8(NUM_MODULES - 1);
+      // allLoops[thisLoop].excitation = random8();
+      loopExcitation();
     }
 
     EVERY_N_MILLIS(20)
@@ -204,7 +251,7 @@ namespace Pixels
 
       for (int i = 0; i < NUM_MODULES; i++)
       {
-        if (allLoops[i].excitation > 127)
+        if (allLoops[i].excitation > activationThreshold)
         {
           ebbAndFlowLoops(allLoops[i]);
         }
@@ -214,5 +261,4 @@ namespace Pixels
       FastLED.show();
     }
   }
-
 };
