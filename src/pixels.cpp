@@ -208,9 +208,9 @@ namespace Pixels
 
   // Behavior Variables
   const uint8_t decay = 254;               // proportion of 255 to fade inactive loops each frame
-  const uint8_t activationThreshold = 170; // excitation level at which loops can turn on
+  const uint8_t activationThreshold = 190; // excitation level at which loops can turn on
   const uint8_t maxActiveLoops = 5;        // max number of randomly excited loops
-  const uint8_t cascadingRate = 25;        // proportion of 255 to fade inactive loops each frame
+  const uint8_t cascadingRate = 20;        // proportion of 255 to fade inactive loops each frame
 
   // State Variables
   uint32_t darkSince = millis();
