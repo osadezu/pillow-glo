@@ -130,6 +130,7 @@ namespace Pixels
   const uint8_t cascadingRate = 51; // proportion of 255 to fade inactive loops each frame
 
   // State Variables
+  uint16_t globalBrightness = 2048;
   uint8_t activeLoops = 0;
 
   void checkMinMaxNoise(uint8_t noiseSample)
@@ -243,8 +244,11 @@ namespace Pixels
     return channels;
   }
 
-  void setGlobalBrightness(uint8_t brightness)
+  void setGlobalBrightness(uint16_t analogValue)
   {
+    globalBrightness = analogValue;
+    uint8_t brightness = map(analogValue, 0, 4095, 0, 255);
+    // uint8_t brightness = dim8_raw(analogValue);
     FastLED.setBrightness(brightness);
   }
 
