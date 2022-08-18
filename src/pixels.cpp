@@ -49,14 +49,83 @@ namespace Pixels
 
 // TODO: Move definitions to independent files
 #ifndef TESTGRID
-// Trailer setup
+  // Trailer setup
+  // const int loopGridHeight = 2;
+  // const int loopGridWidth = 8;
+  // uvLoop *loopGrid[2][8] = {
+  //     {&allLoops[0], &allLoops[3], &allLoops[4], &allLoops[7], &allLoops[8], &allLoops[11], &allLoops[12], &allLoops[15]},
+  //     {&allLoops[1], &allLoops[2], &allLoops[5], &allLoops[6], &allLoops[9], &allLoops[10], &allLoops[13], &allLoops[14]}};
+
+  void buildSetup()
+  {
+    allLoops[0].neighborCount = 1;
+    allLoops[0].neighbors[0] = &allLoops[1];
+
+    allLoops[1].neighborCount = 1;
+    allLoops[1].neighbors[0] = &allLoops[0];
+
+    allLoops[2].neighborCount = 2;
+    allLoops[2].neighbors[0] = &allLoops[3];
+    allLoops[2].neighbors[1] = &allLoops[4];
+
+    allLoops[3].neighborCount = 2;
+    allLoops[3].neighbors[0] = &allLoops[2];
+    allLoops[3].neighbors[1] = &allLoops[4];
+
+    allLoops[4].neighborCount = 2;
+    allLoops[4].neighbors[0] = &allLoops[2];
+    allLoops[4].neighbors[1] = &allLoops[3];
+
+    allLoops[5].neighborCount = 1;
+    allLoops[5].neighbors[0] = &allLoops[6];
+
+    allLoops[6].neighborCount = 1;
+    allLoops[6].neighbors[0] = &allLoops[5];
+
+    allLoops[7].neighborCount = 3;
+    allLoops[7].neighbors[0] = &allLoops[8];
+    allLoops[7].neighbors[1] = &allLoops[9];
+    allLoops[7].neighbors[2] = &allLoops[10];
+
+    allLoops[8].neighborCount = 3;
+    allLoops[8].neighbors[0] = &allLoops[7];
+    allLoops[8].neighbors[1] = &allLoops[9];
+    allLoops[8].neighbors[2] = &allLoops[10];
+
+    allLoops[9].neighborCount = 3;
+    allLoops[9].neighbors[0] = &allLoops[7];
+    allLoops[9].neighbors[1] = &allLoops[8];
+    allLoops[9].neighbors[2] = &allLoops[10];
+
+    allLoops[10].neighborCount = 3;
+    allLoops[10].neighbors[0] = &allLoops[7];
+    allLoops[10].neighbors[1] = &allLoops[8];
+    allLoops[10].neighbors[2] = &allLoops[9];
+
+    allLoops[11].neighborCount = 3;
+    allLoops[11].neighbors[0] = &allLoops[2];
+    allLoops[11].neighbors[1] = &allLoops[10];
+    allLoops[11].neighbors[2] = &allLoops[12];
+
+    allLoops[12].neighborCount = 2;
+    allLoops[12].neighbors[0] = &allLoops[13];
+    allLoops[12].neighbors[1] = &allLoops[14];
+
+    allLoops[13].neighborCount = 2;
+    allLoops[13].neighbors[0] = &allLoops[12];
+    allLoops[13].neighbors[1] = &allLoops[14];
+
+    allLoops[14].neighborCount = 2;
+    allLoops[14].neighbors[0] = &allLoops[12];
+    allLoops[14].neighbors[1] = &allLoops[13];
+  }
 #else
   // Test grid setup
-  const int loopGridHeight = 2;
-  const int loopGridWidth = 8;
-  uvLoop *loopGrid[2][8] = {
-      {&allLoops[0], &allLoops[3], &allLoops[4], &allLoops[7], &allLoops[8], &allLoops[11], &allLoops[12], &allLoops[15]},
-      {&allLoops[1], &allLoops[2], &allLoops[5], &allLoops[6], &allLoops[9], &allLoops[10], &allLoops[13], &allLoops[14]}};
+  // const int loopGridHeight = 2;
+  // const int loopGridWidth = 8;
+  // uvLoop *loopGrid[2][8] = {
+  //     {&allLoops[0], &allLoops[3], &allLoops[4], &allLoops[7], &allLoops[8], &allLoops[11], &allLoops[12], &allLoops[15]},
+  //     {&allLoops[1], &allLoops[2], &allLoops[5], &allLoops[6], &allLoops[9], &allLoops[10], &allLoops[13], &allLoops[14]}};
 
   void buildSetup()
   {
@@ -188,22 +257,22 @@ namespace Pixels
     allLoops[thisLoop].excitation = excitation;
   }
 
-  void exciteLoopGridWithNoise()
-  {
-    uint16_t t = millis();
-    uint8_t yScale = 50;
-    uint8_t xScale = 20;
+  // void exciteLoopGridWithNoise()
+  // {
+  //   uint16_t t = millis();
+  //   uint8_t yScale = 50;
+  //   uint8_t xScale = 20;
 
-    for (int y = 0; y < loopGridHeight; y++)
-    {
-      for (int x = 0; x < loopGridWidth; x++)
-      {
-        uint8_t noise = inoise8(y * yScale, x * xScale, t);
-        checkMinMaxNoise(noise);
-        loopGrid[y][x]->excitation = noise;
-      }
-    }
-  }
+  //   for (int y = 0; y < loopGridHeight; y++)
+  //   {
+  //     for (int x = 0; x < loopGridWidth; x++)
+  //     {
+  //       uint8_t noise = inoise8(y * yScale, x * xScale, t);
+  //       checkMinMaxNoise(noise);
+  //       loopGrid[y][x]->excitation = noise;
+  //     }
+  //   }
+  // }
 
   void setLoop(uvLoop loop, CRGB value)
   {
