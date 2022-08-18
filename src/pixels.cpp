@@ -263,7 +263,7 @@ namespace Pixels
     uint8_t excitation = random8();
     if (excitation > activationThreshold && activeLoops >= maxActiveLoops)
       return;
-    uint8_t thisLoop = random8(NUM_MODULES - 1);
+    uint8_t thisLoop = random8(NUM_MODULES);
     allLoops[thisLoop].excitation = excitation;
   }
 
