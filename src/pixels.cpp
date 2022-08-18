@@ -29,6 +29,11 @@
 #define DARKNESS_WATCHDOG 5                             // Seconds before forcing an activation
 #define DARKNESS_WATCHDOG_MS (DARKNESS_WATCHDOG * 1000) // Milliseconds before forcing an activation
 
+#define DECAY 254                // proportion of 255 to fade inactive loops each frame
+#define ACTIVATION_THRESHOLD 190 // excitation level at which loops can turn on
+#define MAX_ACTIVE_LOOPS 5       // max number of randomly excited loops
+#define CASCADING_RATE 20        // proportion of 255 to fade inactive loops each frame
+
 // Observed values from noise8
 #define NOISE_LOWER_BOUND 30  // 34 much sooner
 #define NOISE_UPPER_BOUND 228 // 218 much sooner
@@ -206,12 +211,6 @@ namespace Pixels
   }
 #endif
 
-  // Behavior Variables
-  const uint8_t decay = 254;               // proportion of 255 to fade inactive loops each frame
-  const uint8_t activationThreshold = 190; // excitation level at which loops can turn on
-  const uint8_t maxActiveLoops = 5;        // max number of randomly excited loops
-  const uint8_t cascadingRate = 20;        // proportion of 255 to fade inactive loops each frame
-
   // State Variables
   uint32_t darkSince = millis();
   uint16_t globalBrightness = 2048;
@@ -236,7 +235,7 @@ namespace Pixels
   {
     for (int i = 0; i < activeLoop.neighborCount; i++)
     {
-      activeLoop.neighbors[i]->cascadedExcitation = scale8(activeLoop.excitation, cascadingRate);
+      activeLoop.neighbors[i]->cascadedExcitation = scale8(activeLoop.excitation, CASCADING_RATE);
     }
   }
 
@@ -249,7 +248,7 @@ namespace Pixels
 
     for (int i = 0; i < NUM_MODULES; i++)
     {
-      if (allLoops[i].excitation > activationThreshold)
+      if (allLoops[i].excitation > ACTIVATION_THRESHOLD)
       {
         if (!allLoops[i].isActive)
         {
@@ -289,11 +288,11 @@ namespace Pixels
     uint8_t excitation;
 
     if (force)
-      excitation = random8(activationThreshold, 255);
+      excitation = random8(ACTIVATION_THRESHOLD, 255);
     else
       excitation = random8();
 
-    if (excitation > activationThreshold && activeLoops >= maxActiveLoops)
+    if (excitation > ACTIVATION_THRESHOLD && activeLoops >= MAX_ACTIVE_LOOPS)
       return;
 
     uint8_t thisLoop = random8(NUM_MODULES);
@@ -376,7 +375,7 @@ namespace Pixels
   {
     for (int i = 0; i < TOTAL_LEDS; i++)
     {
-      leds[i].nscale8(decay);
+      leds[i].nscale8(DECAY);
     }
   }
 
