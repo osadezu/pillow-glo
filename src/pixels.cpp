@@ -5,7 +5,7 @@
 #define DATA_PIN 18 // GPIO18 @ DevKit right-9
 
 /* Comment this line for final pixel setup */
-#define TESTGRID
+// #define TESTGRID
 
 #ifndef TESTGRID
 // Trailer setup values
@@ -375,6 +375,8 @@ namespace Pixels
 
   void ebbAndFlowLoops(uvLoop loop)
   {
+    uint16_t t = millis() / 2;
+    uint8_t scale = 50;
     uint8_t currExcitation = 255;
 
     // // Ease-in newly active loop
@@ -392,9 +394,6 @@ namespace Pixels
     {
       currExcitation = loop.cascadedExcitation;
     }
-
-    uint16_t t = millis() / 2;
-    uint8_t scale = 50;
 
     for (int i = 0; i < loop.ledCount; i++)
     {
