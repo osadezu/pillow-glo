@@ -127,7 +127,7 @@ namespace Pixels
   const uint8_t decay = 254;               // proportion of 255 to fade inactive loops each frame
   const uint8_t activationThreshold = 170; // excitation level at which loops can turn on
   const uint8_t maxActiveLoops = 6;
-  const uint8_t cascadingRate = 51; // proportion of 255 to fade inactive loops each frame
+  const uint8_t cascadingRate = 25; // proportion of 255 to fade inactive loops each frame
 
   // State Variables
   uint16_t globalBrightness = 2048;
@@ -152,7 +152,7 @@ namespace Pixels
   {
     for (int i = 0; i < activeLoop.neighborCount; i++)
     {
-      activeLoop.neighbors[i]->cascadedExcitation = cascadingRate * activeLoop.excitation;
+      activeLoop.neighbors[i]->cascadedExcitation = scale8(activeLoop.excitation, cascadingRate);
     }
   }
 
@@ -284,6 +284,10 @@ namespace Pixels
     for (int i = 0; i < loop.ledCount; i++)
     {
       uint8_t noise = inoise8(i * scale, t);
+      if (!loop.isActive && loop.cascadedExcitation > 0)
+      {
+        noise = scale8(noise, loop.cascadedExcitation);
+      }
       uint32_t noiseRGB = allChannels(noise);
       loop.leds[i] = CRGB(noiseRGB);
     }
