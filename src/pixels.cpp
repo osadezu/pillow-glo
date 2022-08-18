@@ -33,6 +33,7 @@ namespace Pixels
     CRGB *leds;
     bool isActive = false;
     uint8_t excitation = 0;
+    uint8_t cascadedExcitation = 0;
     uint8_t deferred = 0;
     uint8_t neighborCount = 0;
     uvLoop *neighbors[3];
@@ -56,12 +57,67 @@ namespace Pixels
   uvLoop *loopGrid[2][8] = {
       {&allLoops[0], &allLoops[3], &allLoops[4], &allLoops[7], &allLoops[8], &allLoops[11], &allLoops[12], &allLoops[15]},
       {&allLoops[1], &allLoops[2], &allLoops[5], &allLoops[6], &allLoops[9], &allLoops[10], &allLoops[13], &allLoops[14]}};
+
+  void buildSetup()
+  {
+    allLoops[0].neighborCount = 2;
+    allLoops[0].neighbors[0] = &allLoops[1];
+    allLoops[0].neighbors[1] = &allLoops[3];
+
+    allLoops[1].neighborCount = 2;
+    allLoops[1].neighbors[0] = &allLoops[0];
+    allLoops[1].neighbors[1] = &allLoops[2];
+
+    allLoops[2].neighborCount = 3;
+    allLoops[2].neighbors[0] = &allLoops[1];
+    allLoops[2].neighbors[1] = &allLoops[3];
+    allLoops[2].neighbors[2] = &allLoops[5];
+
+    allLoops[3].neighborCount = 3;
+    allLoops[3].neighbors[0] = &allLoops[0];
+    allLoops[3].neighbors[1] = &allLoops[2];
+    allLoops[3].neighbors[2] = &allLoops[4];
+
+    allLoops[4].neighborCount = 3;
+    allLoops[4].neighbors[0] = &allLoops[3];
+    allLoops[4].neighbors[1] = &allLoops[5];
+    allLoops[4].neighbors[2] = &allLoops[7];
+
+    allLoops[5].neighborCount = 3;
+    allLoops[5].neighbors[0] = &allLoops[2];
+    allLoops[5].neighbors[1] = &allLoops[4];
+    allLoops[5].neighbors[2] = &allLoops[6];
+
+    allLoops[6].neighborCount = 3;
+    allLoops[6].neighbors[0] = &allLoops[5];
+    allLoops[6].neighbors[1] = &allLoops[7];
+    allLoops[6].neighbors[2] = &allLoops[9];
+
+    allLoops[10].neighborCount = 3;
+    allLoops[10].neighbors[0] = &allLoops[9];
+    allLoops[10].neighbors[1] = &allLoops[11];
+    allLoops[10].neighbors[2] = &allLoops[13];
+
+    allLoops[11].neighborCount = 3;
+    allLoops[11].neighbors[0] = &allLoops[8];
+    allLoops[11].neighbors[1] = &allLoops[10];
+    allLoops[11].neighbors[2] = &allLoops[12];
+
+    allLoops[14].neighborCount = 2;
+    allLoops[14].neighbors[0] = &allLoops[13];
+    allLoops[14].neighbors[1] = &allLoops[15];
+
+    allLoops[15].neighborCount = 2;
+    allLoops[15].neighbors[0] = &allLoops[12];
+    allLoops[15].neighbors[1] = &allLoops[14];
+  }
 #endif
 
   // Behavior Variables
   const uint8_t decay = 254;               // proportion of 255 to fade inactive loops each frame
   const uint8_t activationThreshold = 170; // excitation level at which loops can turn on
-  const uint8_t maxActiveLoops = 8;
+  const uint8_t maxActiveLoops = 6;
+  const uint8_t cascadingRate = 51; // proportion of 255 to fade inactive loops each frame
 
   // State Variables
   uint8_t activeLoops = 0;
@@ -81,9 +137,18 @@ namespace Pixels
     Serial.println(maxNoise);
   }
 
+  void exciteNeighbors(uvLoop activeLoop)
+  {
+    for (int i = 0; i < activeLoop.neighborCount; i++)
+    {
+      activeLoop.neighbors[i]->cascadedExcitation = cascadingRate * activeLoop.excitation;
+    }
+  }
+
   // Check all loops excitation
   void handleLoopActivation()
   {
+    Serial.println("Active loops");
     int countActiveLoops = 0;
     for (int i = 0; i < NUM_MODULES; i++)
     {
@@ -91,6 +156,8 @@ namespace Pixels
       {
         allLoops[i].isActive = true;
         countActiveLoops++;
+        Serial.println(i);
+        // exciteNeighbors(allLoops[i]);
       }
       else
       {
@@ -98,22 +165,16 @@ namespace Pixels
       }
     }
     activeLoops = countActiveLoops;
-    Serial.println("Active loops");
-    Serial.println(activeLoops);
   }
 
   // Assign random excitation level to randomly chosen loop
   void exciteRandomLoop()
   {
     uint8_t excitation = random8();
-    Serial.println("Excitation");
-    Serial.println(excitation);
     if (excitation > activationThreshold && activeLoops >= maxActiveLoops)
       return;
     uint8_t thisLoop = random8(NUM_MODULES - 1);
     allLoops[thisLoop].excitation = excitation;
-    Serial.println("Excited loop");
-    Serial.println(thisLoop);
   }
 
   void exciteLoopGridWithNoise()
@@ -152,6 +213,7 @@ namespace Pixels
     {
       allLoops[i].leds = &leds[i * LEDS_MODULE];
     }
+    buildSetup();
   }
 
   void setChannels()
@@ -292,6 +354,12 @@ namespace Pixels
         if (allLoops[i].isActive)
         {
           ebbAndFlowLoops(allLoops[i]);
+          exciteNeighbors(allLoops[i]);
+        }
+        else if (allLoops[i].cascadedExcitation > 0)
+        {
+          ebbAndFlowLoops(allLoops[i]);
+          allLoops[i].cascadedExcitation = 0;
         }
         // lavaLoops(allLoops[i]);
       }
