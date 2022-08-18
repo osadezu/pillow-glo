@@ -5,7 +5,7 @@
 #define DATA_PIN 18 // GPIO18 @ DevKit right-9
 
 /* Comment this line for final pixel setup */
-// #define TESTGRID
+#define TESTGRID
 
 #ifndef TESTGRID
 // Trailer setup values
@@ -34,7 +34,7 @@ namespace Pixels
     bool isActive = false;
     uint8_t excitation = 0;
     uint8_t cascadedExcitation = 0;
-    uint8_t deferred = 0;
+    uint8_t deferringExcitation = 0;
     uint8_t neighborCount = 0;
     uvLoop *neighbors[3];
   };
@@ -238,9 +238,15 @@ namespace Pixels
     {
       if (allLoops[i].excitation > activationThreshold)
       {
-        allLoops[i].isActive = true;
+        if (!allLoops[i].isActive)
+        {
+          allLoops[i].isActive = true;
+          allLoops[i].deferringExcitation = allLoops[i].excitation;
+        }
         countActiveLoops++;
         Serial.println(i);
+        Serial.println(allLoops[i].excitation);
+        Serial.println(allLoops[i].deferringExcitation);
         // exciteNeighbors(allLoops[i]);
       }
       else
@@ -351,16 +357,31 @@ namespace Pixels
 
   void ebbAndFlowLoops(uvLoop loop)
   {
+    uint8_t currExcitation = 255;
+
+    // Ease-in newly active loop
+    // if (loop.isActive && loop.deferringExcitation > 0)
+    // {
+    //   currExcitation = sub8(loop.excitation, loop.deferringExcitation);
+    //   Serial.println("Transient");
+    //   Serial.println(currExcitation);
+    //   loop.deferringExcitation = scale8(loop.deferringExcitation, 127);
+    //   Serial.println(loop.deferringExcitation);
+    // }
+
+    // Scale down cascaded loop
+    if (!loop.isActive && loop.cascadedExcitation > 0)
+    {
+      currExcitation = loop.cascadedExcitation;
+    }
+
     uint16_t t = millis() / 2;
     uint8_t scale = 50;
 
     for (int i = 0; i < loop.ledCount; i++)
     {
       uint8_t noise = inoise8(i * scale, t);
-      if (!loop.isActive && loop.cascadedExcitation > 0)
-      {
-        noise = scale8(noise, loop.cascadedExcitation);
-      }
+      noise = scale8(noise, currExcitation);
       uint32_t noiseRGB = allChannels(noise);
       loop.leds[i] = CRGB(noiseRGB);
     }
