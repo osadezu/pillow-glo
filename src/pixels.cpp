@@ -5,7 +5,7 @@
 #define DATA_PIN 18 // GPIO18 @ DevKit right-9
 
 /* Comment this line for final pixel setup */
-#define TESTGRID
+// #define TESTGRID
 
 #ifndef TESTGRID
 // Trailer setup values
@@ -76,6 +76,8 @@ namespace Pixels
     allLoops[4].neighbors[0] = &allLoops[2];
     allLoops[4].neighbors[1] = &allLoops[3];
 
+    // Back Corners 5 & 6
+    // Artificial neighbors
     allLoops[5].neighborCount = 1;
     allLoops[5].neighbors[0] = &allLoops[6];
 
@@ -102,6 +104,8 @@ namespace Pixels
     allLoops[10].neighbors[1] = &allLoops[8];
     allLoops[10].neighbors[2] = &allLoops[9];
 
+    // Solo unit 11 (Ruth)
+    // Artificial neighbors
     allLoops[11].neighborCount = 3;
     allLoops[11].neighbors[0] = &allLoops[2];
     allLoops[11].neighbors[1] = &allLoops[10];
