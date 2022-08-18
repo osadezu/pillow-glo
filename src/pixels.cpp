@@ -60,56 +60,66 @@ namespace Pixels
 
   void buildSetup()
   {
-    allLoops[0].neighborCount = 2;
+    allLoops[0].neighborCount = 1;
     allLoops[0].neighbors[0] = &allLoops[1];
-    allLoops[0].neighbors[1] = &allLoops[3];
 
-    allLoops[1].neighborCount = 2;
+    allLoops[1].neighborCount = 1;
     allLoops[1].neighbors[0] = &allLoops[0];
-    allLoops[1].neighbors[1] = &allLoops[2];
 
-    allLoops[2].neighborCount = 3;
-    allLoops[2].neighbors[0] = &allLoops[1];
-    allLoops[2].neighbors[1] = &allLoops[3];
-    allLoops[2].neighbors[2] = &allLoops[5];
+    allLoops[2].neighborCount = 2;
+    allLoops[2].neighbors[0] = &allLoops[3];
+    allLoops[2].neighbors[1] = &allLoops[4];
 
-    allLoops[3].neighborCount = 3;
-    allLoops[3].neighbors[0] = &allLoops[0];
-    allLoops[3].neighbors[1] = &allLoops[2];
-    allLoops[3].neighbors[2] = &allLoops[4];
+    allLoops[3].neighborCount = 2;
+    allLoops[3].neighbors[0] = &allLoops[2];
+    allLoops[3].neighbors[1] = &allLoops[4];
 
-    allLoops[4].neighborCount = 3;
-    allLoops[4].neighbors[0] = &allLoops[3];
-    allLoops[4].neighbors[1] = &allLoops[5];
-    allLoops[4].neighbors[2] = &allLoops[7];
+    allLoops[4].neighborCount = 2;
+    allLoops[4].neighbors[0] = &allLoops[2];
+    allLoops[4].neighbors[1] = &allLoops[3];
 
-    allLoops[5].neighborCount = 3;
-    allLoops[5].neighbors[0] = &allLoops[2];
-    allLoops[5].neighbors[1] = &allLoops[4];
-    allLoops[5].neighbors[2] = &allLoops[6];
+    allLoops[5].neighborCount = 1;
+    allLoops[5].neighbors[0] = &allLoops[6];
 
-    allLoops[6].neighborCount = 3;
+    allLoops[6].neighborCount = 1;
     allLoops[6].neighbors[0] = &allLoops[5];
-    allLoops[6].neighbors[1] = &allLoops[7];
-    allLoops[6].neighbors[2] = &allLoops[9];
+
+    allLoops[7].neighborCount = 3;
+    allLoops[7].neighbors[0] = &allLoops[8];
+    allLoops[7].neighbors[1] = &allLoops[9];
+    allLoops[7].neighbors[2] = &allLoops[10];
+
+    allLoops[8].neighborCount = 3;
+    allLoops[8].neighbors[0] = &allLoops[7];
+    allLoops[8].neighbors[1] = &allLoops[9];
+    allLoops[8].neighbors[2] = &allLoops[10];
+
+    allLoops[9].neighborCount = 3;
+    allLoops[9].neighbors[0] = &allLoops[7];
+    allLoops[9].neighbors[1] = &allLoops[8];
+    allLoops[9].neighbors[2] = &allLoops[10];
 
     allLoops[10].neighborCount = 3;
-    allLoops[10].neighbors[0] = &allLoops[9];
-    allLoops[10].neighbors[1] = &allLoops[11];
-    allLoops[10].neighbors[2] = &allLoops[13];
+    allLoops[10].neighbors[0] = &allLoops[7];
+    allLoops[10].neighbors[1] = &allLoops[8];
+    allLoops[10].neighbors[2] = &allLoops[9];
 
     allLoops[11].neighborCount = 3;
-    allLoops[11].neighbors[0] = &allLoops[8];
+    allLoops[11].neighbors[0] = &allLoops[2];
     allLoops[11].neighbors[1] = &allLoops[10];
     allLoops[11].neighbors[2] = &allLoops[12];
 
-    allLoops[14].neighborCount = 2;
-    allLoops[14].neighbors[0] = &allLoops[13];
-    allLoops[14].neighbors[1] = &allLoops[15];
+    allLoops[12].neighborCount = 2;
+    allLoops[12].neighbors[0] = &allLoops[13];
+    allLoops[12].neighbors[1] = &allLoops[14];
 
-    allLoops[15].neighborCount = 2;
-    allLoops[15].neighbors[0] = &allLoops[12];
-    allLoops[15].neighbors[1] = &allLoops[14];
+    allLoops[13].neighborCount = 2;
+    allLoops[13].neighbors[0] = &allLoops[12];
+    allLoops[13].neighbors[1] = &allLoops[14];
+
+    allLoops[14].neighborCount = 2;
+    allLoops[14].neighbors[0] = &allLoops[12];
+    allLoops[14].neighbors[1] = &allLoops[13];
   }
 #endif
 
@@ -356,7 +366,7 @@ namespace Pixels
           ebbAndFlowLoops(allLoops[i]);
           exciteNeighbors(allLoops[i]);
         }
-        else if (allLoops[i].cascadedExcitation > 0)
+        if (!allLoops[i].isActive && allLoops[i].cascadedExcitation > 0)
         {
           ebbAndFlowLoops(allLoops[i]);
           allLoops[i].cascadedExcitation = 0;
