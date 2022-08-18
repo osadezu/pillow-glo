@@ -71,7 +71,7 @@ namespace Pixels
   //     {&allLoops[0], &allLoops[3], &allLoops[4], &allLoops[7], &allLoops[8], &allLoops[11], &allLoops[12], &allLoops[15]},
   //     {&allLoops[1], &allLoops[2], &allLoops[5], &allLoops[6], &allLoops[9], &allLoops[10], &allLoops[13], &allLoops[14]}};
 
-  void buildSetup()
+  void buildLedSetup()
   {
     allLoops[0].neighborCount = 1;
     allLoops[0].neighbors[0] = &allLoops[1];
@@ -146,7 +146,7 @@ namespace Pixels
   //     {&allLoops[0], &allLoops[3], &allLoops[4], &allLoops[7], &allLoops[8], &allLoops[11], &allLoops[12], &allLoops[15]},
   //     {&allLoops[1], &allLoops[2], &allLoops[5], &allLoops[6], &allLoops[9], &allLoops[10], &allLoops[13], &allLoops[14]}};
 
-  void buildSetup()
+  void buildLedSetup()
   {
     allLoops[0].neighborCount = 1;
     allLoops[0].neighbors[0] = &allLoops[1];
@@ -324,20 +324,6 @@ namespace Pixels
     }
   }
 
-  void setup()
-  {
-    FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, TOTAL_LEDS);
-    FastLED.setBrightness(128);
-    FastLED.clear();
-    FastLED.show();
-
-    for (int i = 0; i < NUM_MODULES; i++)
-    {
-      allLoops[i].leds = &leds[i * LEDS_MODULE];
-    }
-    buildSetup();
-  }
-
   void setChannels()
   {
     channelMask = (channelMask) % 7 + 1; // All channel combinations RGB
@@ -467,6 +453,20 @@ namespace Pixels
       uint8_t val = inoise8(i * scale, t);
       leds[offsets[i]] = CHSV(CRGB::Red, 255, val);
     }
+  }
+
+  void setup()
+  {
+    FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, TOTAL_LEDS);
+    FastLED.setBrightness(128);
+    FastLED.clear();
+    FastLED.show();
+
+    for (int i = 0; i < NUM_MODULES; i++)
+    {
+      allLoops[i].leds = &leds[i * LEDS_MODULE];
+    }
+    buildLedSetup();
   }
 
   void loop()
