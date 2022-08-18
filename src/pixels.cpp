@@ -19,9 +19,19 @@
 
 #define TOTAL_LEDS (LEDS_MODULE * NUM_MODULES)
 
+// Behavior Parameters
+#define FRAME_PERIOD_MS 20 // 20 gives 50 frames per second
+#ifndef TESTGRID
+#define EXCITE_PERIOD_S 5
+#else
+#define EXCITE_PERIOD_S 3
+#endif
+#define DARKNESS_WATCHDOG 5                             // Seconds before forcing an activation
+#define DARKNESS_WATCHDOG_MS (DARKNESS_WATCHDOG * 1000) // Milliseconds before forcing an activation
+
 // Observed values from noise8
-#define NOISE_LOWER_BOUND = 30;  // 34 much sooner
-#define NOISE_UPPER_BOUND = 228; // 218 much sooner
+#define NOISE_LOWER_BOUND 30  // 34 much sooner
+#define NOISE_UPPER_BOUND 228 // 218 much sooner
 
 namespace Pixels
 {
@@ -199,10 +209,11 @@ namespace Pixels
   // Behavior Variables
   const uint8_t decay = 254;               // proportion of 255 to fade inactive loops each frame
   const uint8_t activationThreshold = 170; // excitation level at which loops can turn on
-  const uint8_t maxActiveLoops = 6;
-  const uint8_t cascadingRate = 25; // proportion of 255 to fade inactive loops each frame
+  const uint8_t maxActiveLoops = 5;        // max number of randomly excited loops
+  const uint8_t cascadingRate = 25;        // proportion of 255 to fade inactive loops each frame
 
   // State Variables
+  uint32_t darkSince = millis();
   uint16_t globalBrightness = 2048;
   uint8_t activeLoops = 0;
 
@@ -234,6 +245,8 @@ namespace Pixels
   {
     Serial.println("Active loops");
     int countActiveLoops = 0;
+    bool deactivatedLoop = false;
+
     for (int i = 0; i < NUM_MODULES; i++)
     {
       if (allLoops[i].excitation > activationThreshold)
@@ -245,24 +258,44 @@ namespace Pixels
         }
         countActiveLoops++;
         Serial.println(i);
-        Serial.println(allLoops[i].excitation);
-        Serial.println(allLoops[i].deferringExcitation);
-        // exciteNeighbors(allLoops[i]);
+        exciteNeighbors(allLoops[i]);
       }
-      else
+      else if (allLoops[i].isActive)
       {
         allLoops[i].isActive = false;
+        allLoops[i].deferringExcitation = 0;
+        deactivatedLoop = true;
       }
     }
     activeLoops = countActiveLoops;
+    if (!activeLoops && deactivatedLoop)
+    {
+      darkSince = millis();
+    }
+  }
+
+  void deactivateAllLoops()
+  {
+    for (int i = 0; i < NUM_MODULES; i++)
+    {
+      allLoops[i].excitation = 0;
+    }
+    handleLoopActivation();
   }
 
   // Assign random excitation level to randomly chosen loop
-  void exciteRandomLoop()
+  void exciteRandomLoop(bool force = false)
   {
-    uint8_t excitation = random8();
+    uint8_t excitation;
+
+    if (force)
+      excitation = random8(activationThreshold, 255);
+    else
+      excitation = random8();
+
     if (excitation > activationThreshold && activeLoops >= maxActiveLoops)
       return;
+
     uint8_t thisLoop = random8(NUM_MODULES);
     allLoops[thisLoop].excitation = excitation;
   }
@@ -359,7 +392,7 @@ namespace Pixels
   {
     uint8_t currExcitation = 255;
 
-    // Ease-in newly active loop
+    // // Ease-in newly active loop
     // if (loop.isActive && loop.deferringExcitation > 0)
     // {
     //   currExcitation = sub8(loop.excitation, loop.deferringExcitation);
@@ -439,14 +472,20 @@ namespace Pixels
 
   void loop()
   {
-    EVERY_N_SECONDS(3)
+    EVERY_N_SECONDS(EXCITE_PERIOD_S)
     {
       // exciteLoopGridWithNoise();
-      exciteRandomLoop();
+      uint32_t now = millis();
+      bool force = false;
+      if (!activeLoops && now - darkSince >= DARKNESS_WATCHDOG_MS)
+      {
+        force = true;
+      }
+      exciteRandomLoop(force);
       handleLoopActivation();
     }
 
-    EVERY_N_MILLIS(20)
+    EVERY_N_MILLIS(FRAME_PERIOD_MS)
     {
       fadeAll();
 
