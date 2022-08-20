@@ -54,6 +54,12 @@ namespace Settings
           Pixels::setChannels();
         }
         break;
+      case 2: // Mode 2: Toggle Dithering
+        if (adjButton.isPressed())
+        {
+          Pixels::toggleDithering();
+        }
+        break;
       default:
         settingsMode = 0;
       }

@@ -9,7 +9,7 @@ void setup()
   Settings::setup();
 
   // Debugging output
-  Serial.begin(115200);
+  // Serial.begin(115200);
 }
 
 void loop()

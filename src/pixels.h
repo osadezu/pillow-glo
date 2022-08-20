@@ -30,4 +30,6 @@ namespace Pixels
   void ebbAndFlowAll();
   void lavaLoops(uvLoop);
   void lava(CRGB[], uint8_t[], uint8_t);
+
+  void toggleDithering();
 };

@@ -5,7 +5,7 @@
 #define DATA_PIN 18 // GPIO18 @ DevKit right-9
 
 /* Comment this line for final pixel setup */
-// #define TESTGRID
+#define TESTGRID
 
 #ifndef TESTGRID
 // Trailer setup values
@@ -216,20 +216,20 @@ namespace Pixels
   uint16_t globalBrightness = 2048;
   uint8_t activeLoops = 0;
 
-  void checkMinMaxNoise(uint8_t noiseSample)
-  {
-    static uint8_t minNoise = 255;
-    static uint8_t maxNoise = 0;
+  // void checkMinMaxNoise(uint8_t noiseSample)
+  // {
+  //   static uint8_t minNoise = 255;
+  //   static uint8_t maxNoise = 0;
 
-    if (noiseSample < minNoise)
-      minNoise = noiseSample;
-    if (noiseSample > maxNoise)
-      maxNoise = noiseSample;
+  //   if (noiseSample < minNoise)
+  //     minNoise = noiseSample;
+  //   if (noiseSample > maxNoise)
+  //     maxNoise = noiseSample;
 
-    Serial.println("MinMaxNoise");
-    Serial.println(minNoise);
-    Serial.println(maxNoise);
-  }
+  //   Serial.println("MinMaxNoise");
+  //   Serial.println(minNoise);
+  //   Serial.println(maxNoise);
+  // }
 
   void exciteNeighbors(uvLoop activeLoop)
   {
@@ -242,7 +242,7 @@ namespace Pixels
   // Check all loops excitation
   void handleLoopActivation()
   {
-    Serial.println("Active loops");
+    // Serial.println("Active loops");
     int countActiveLoops = 0;
     bool deactivatedLoop = false;
 
@@ -256,7 +256,7 @@ namespace Pixels
           allLoops[i].deferringExcitation = allLoops[i].excitation;
         }
         countActiveLoops++;
-        Serial.println(i);
+        // Serial.println(i);
         exciteNeighbors(allLoops[i]);
       }
       else if (allLoops[i].isActive)
@@ -454,10 +454,18 @@ namespace Pixels
     }
   }
 
+  void toggleDithering()
+  {
+    static bool dither = true;
+    dither = !dither;
+    FastLED.setDither(dither);
+  }
+
   void setup()
   {
     FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, TOTAL_LEDS);
     FastLED.setBrightness(128);
+    // FastLED.setDither(0);
     FastLED.clear();
     FastLED.show();
 
@@ -512,8 +520,8 @@ namespace Pixels
         }
         // lavaLoops(allLoops[i]);
       }
-
-      FastLED.show();
     }
+
+    FastLED.show();
   }
 };
