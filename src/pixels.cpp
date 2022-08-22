@@ -5,7 +5,7 @@
 #define DATA_PIN 18 // GPIO18 @ DevKit right-9
 
 /* Comment this line for final pixel setup */
-#define TESTGRID
+// #define TESTGRID
 
 #ifndef TESTGRID
 // Trailer setup values
@@ -239,7 +239,7 @@ namespace Pixels
     }
   }
 
-  // Check all loops excitation
+  // Check all loops excitation and count active
   void handleLoopActivation()
   {
     // Serial.println("Active loops");
@@ -248,7 +248,7 @@ namespace Pixels
 
     for (int i = 0; i < NUM_MODULES; i++)
     {
-      if (allLoops[i].excitation > ACTIVATION_THRESHOLD)
+      if (allLoops[i].excitation >= ACTIVATION_THRESHOLD)
       {
         if (!allLoops[i].isActive)
         {
@@ -257,7 +257,7 @@ namespace Pixels
         }
         countActiveLoops++;
         // Serial.println(i);
-        exciteNeighbors(allLoops[i]);
+        // exciteNeighbors(allLoops[i]);
       }
       else if (allLoops[i].isActive)
       {
@@ -266,7 +266,9 @@ namespace Pixels
         deactivatedLoop = true;
       }
     }
+
     activeLoops = countActiveLoops;
+
     if (!activeLoops && deactivatedLoop)
     {
       darkSince = millis();
@@ -491,9 +493,14 @@ namespace Pixels
       handleLoopActivation();
     }
 
-    EVERY_N_MILLIS(FRAME_PERIOD_MS)
+    EVERY_N_MILLIS(FRAME_PERIOD_MS * 3)
     {
       fadeAll();
+    }
+
+    EVERY_N_MILLIS(FRAME_PERIOD_MS)
+    {
+      // fadeAll();
 
       // ebbAndFlowAll();
 
