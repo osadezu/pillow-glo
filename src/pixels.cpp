@@ -5,7 +5,7 @@
 #define DATA_PIN 18 // GPIO18 @ DevKit right-9
 
 /* Comment this line for final pixel setup */
-#define TESTGRID
+// #define TESTGRID
 
 #ifndef TESTGRID
 // Trailer setup values
