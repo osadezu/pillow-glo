@@ -235,7 +235,8 @@ namespace Pixels
   {
     for (int i = 0; i < activeLoop.neighborCount; i++)
     {
-      activeLoop.neighbors[i]->cascadedExcitation = scale8(activeLoop.excitation, CASCADING_RATE);
+      uint8_t currExcitation = sub8(activeLoop.excitation, activeLoop.deferringExcitation);
+      activeLoop.neighbors[i]->cascadedExcitation = scale8(currExcitation, CASCADING_RATE);
     }
   }
 
