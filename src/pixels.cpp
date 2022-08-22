@@ -375,26 +375,32 @@ namespace Pixels
     }
   }
 
-  void ebbAndFlowLoops(uvLoop loop)
+  void ebbAndFlowLoops(uvLoop &loop)
   {
     uint16_t t = millis() / 2;
     uint8_t scale = 50;
     uint8_t currExcitation = 255;
 
-    // // Ease-in newly active loop
-    // if (loop.isActive && loop.deferringExcitation > 0)
-    // {
-    //   currExcitation = sub8(loop.excitation, loop.deferringExcitation);
-    //   Serial.println("Transient");
-    //   Serial.println(currExcitation);
-    //   loop.deferringExcitation = scale8(loop.deferringExcitation, 127);
-    //   Serial.println(loop.deferringExcitation);
-    // }
+    if (loop.isActive)
+    {
+      // Ease-in newly active loop
+      if (loop.deferringExcitation > 0)
+      {
+        currExcitation = sub8(loop.excitation, loop.deferringExcitation);
+        loop.deferringExcitation = scale8(loop.deferringExcitation, 254);
+      }
+      else
+      {
+        currExcitation = loop.excitation;
+      }
+      exciteNeighbors(loop);
+    }
 
-    // Scale down cascaded loop
+    // Trigger cascaded loop and clear cascaded
     if (!loop.isActive && loop.cascadedExcitation > 0)
     {
       currExcitation = loop.cascadedExcitation;
+      loop.cascadedExcitation = 0;
     }
 
     for (int i = 0; i < loop.ledCount; i++)
@@ -467,7 +473,6 @@ namespace Pixels
   {
     FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, TOTAL_LEDS);
     FastLED.setBrightness(128);
-    // FastLED.setDither(0);
     FastLED.clear();
     FastLED.show();
 
@@ -518,12 +523,10 @@ namespace Pixels
         if (allLoops[i].isActive)
         {
           ebbAndFlowLoops(allLoops[i]);
-          exciteNeighbors(allLoops[i]);
         }
         if (!allLoops[i].isActive && allLoops[i].cascadedExcitation > 0)
         {
           ebbAndFlowLoops(allLoops[i]);
-          allLoops[i].cascadedExcitation = 0;
         }
         // lavaLoops(allLoops[i]);
       }
