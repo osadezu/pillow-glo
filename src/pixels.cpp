@@ -5,7 +5,7 @@
 #define DATA_PIN 18 // GPIO18 @ DevKit right-9
 
 /* Comment this line for final pixel setup */
-// #define TESTGRID
+#define TESTGRID
 
 #ifndef TESTGRID
 // Trailer setup values
@@ -508,17 +508,6 @@ namespace Pixels
     {
       // fadeAll();
 
-      // ebbAndFlowAll();
-
-      // CRGB colors[3] = {CRGB::Red,
-      //                   CRGB::Green,
-      //                   CRGB::Blue};
-
-      // for (int i = 0; i < NUM_MODULES; i++)
-      // {
-      //   setLoop(allLoops[i], colors[i % 3]);
-      // }
-
       for (int i = 0; i < NUM_MODULES; i++)
       {
         if (allLoops[i].isActive)
@@ -529,7 +518,6 @@ namespace Pixels
         {
           ebbAndFlowLoops(allLoops[i]);
         }
-        // lavaLoops(allLoops[i]);
       }
     }
 
