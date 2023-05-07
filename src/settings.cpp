@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <ezButton.h>
 
-#include "Pixels.h"
+#include "PixelStrings.h"
 
 #define POT_PIN 36      // ADC1_0 - GPIO36 @ DevKit left-3
 #define LED_PIN 25      // GPIO25 @ DevKit left-9
@@ -19,7 +19,7 @@ namespace Settings
   void readBrightness()
   {
     uint16_t potValue = analogRead(POT_PIN); // 12-bit value 0-4095
-    Pixels::setGlobalBrightness(potValue);
+    PixelStrings::setGlobalBrightness(potValue);
   }
 
   void setup()
@@ -51,13 +51,13 @@ namespace Settings
       case 1: // Mode 1: pixel channels (R-G-B)
         if (adjButton.isPressed())
         {
-          Pixels::setChannels();
+          PixelStrings::setChannels();
         }
         break;
       case 2: // Mode 2: Toggle Dithering
         if (adjButton.isPressed())
         {
-          Pixels::toggleDithering();
+          PixelStrings::toggleDithering();
         }
         break;
       default:
