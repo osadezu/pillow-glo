@@ -1,19 +1,19 @@
 #include <Arduino.h>
 
 #include "settings.h"
-#include "pixels.h"
+#include "pixelStrings.h"
 
 void setup()
 {
-  Pixels::setup();
+  PixelStrings::setup();
   Settings::setup();
 
   // Debugging output
-  // Serial.begin(115200);
+  Serial.begin(115200);
 }
 
 void loop()
 {
   Settings::loop();
-  Pixels::loop();
+  PixelStrings::loop();
 }
